@@ -46,7 +46,7 @@ public class PermissionSetGenerator
 	public static final String NODE_LABEL = "label";
 	public static final String NODE_FIELD_PERMISSIONS = "fieldPermissions";
 	public static final String NODE_FIELDS = "fields";
-	
+
 	
 	public static final String ELM_ALLOW_CREATE = "allowCreate";
 	public static final String ELM_ALLOW_DELETE = "allowDelete";
@@ -235,7 +235,7 @@ public class PermissionSetGenerator
 
 			if(psName.toUpperCase().endsWith("-TEMPLATE"))
 			{
-				psPath = PS_TEMPLATE_DIR + File.separatorChar + psName.replace("-", "").replace("Template","") + ".permissionset_template";
+				psPath = PS_TEMPLATE_DIR + File.separatorChar + psName.replace("-Template","").replace("-", "") + ".permissionset_template";
 			}
 			else
 			{
