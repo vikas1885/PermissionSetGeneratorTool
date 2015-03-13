@@ -29,6 +29,7 @@ public class PermissionSetGenerator
 	public static final String BASE_DIR = "E:\\Finanicial Force\\FFA\\source\\src\\";
 	public static final String PS_DIR = BASE_DIR + "permissionsets" + File.separatorChar;
 	public static final String PS_TEMPLATE_DIR = BASE_DIR + "permissionset_templates";
+	public static final String CUSTOM_PS_DIR = BASE_DIR + "customPermissions" + File.separatorChar;
 	public static final String PS_PROPERTY_DIR = BASE_DIR + "permissionsetProperty";
 	public static final String OBJECTS_DIR = BASE_DIR + "objects";
 	
@@ -326,6 +327,60 @@ public class PermissionSetGenerator
 		return lines;
 	}
 
+	public static void createCustomPermissionFile(String customPermissionLabel)
+	{
+		try 
+		{
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+			// root elements
+			Document doc = docBuilder.newDocument();
+	    	doc.setXmlStandalone(true);
+		
+	    	Element rootElement = doc.createElement("CustomPermission");
+			doc.appendChild(rootElement);
+
+			Attr attr = doc.createAttribute("xmlns");
+			attr.setValue("http://soap.sforce.com/2006/04/metadata");
+			rootElement.setAttributeNode(attr);
+			
+			
+			Element labelElement = doc.createElement(NODE_LABEL);
+			labelElement.setTextContent(customPermissionLabel);
+
+			rootElement.appendChild(labelElement);
+			
+			// write the content into xml file
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			
+
+			DOMSource source = new DOMSource(doc);
+			
+			String psPath = "";
+			StreamResult result;
+			
+			String psName = customPermissionLabel.replace(" ", "");
+			
+			psPath = CUSTOM_PS_DIR + psName.replace("-", "") + ".customPermission";
+			
+			result = new StreamResult(new File(psPath));
+			
+			transformer.transform(source, result);
+			
+		//	System.out.println(PS_DIR +"   " +ps.getPermissionSetName() + "  saved!");
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
+		}
+	}
+	
 	public static List<PermissionSet> parsePropertyFile(File propertyFile) throws Exception
 	{
 		BufferedReader br = null;
@@ -374,7 +429,8 @@ public class PermissionSetGenerator
 									}
 									else if(cstic.equalsIgnoreCase(NODE_CUSTOM_PERMISSIONS))
 									{
-										psProperty.getCustomPermissions().add(value);						
+										createCustomPermissionFile(value);
+										psProperty.getCustomPermissions().add(value.trim().replace("-", "").replace(" ", ""));						
 									}
 									else if(cstic.equalsIgnoreCase(NODE_TAB_SETTINGS))
 									{
