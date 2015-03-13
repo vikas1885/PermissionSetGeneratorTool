@@ -31,7 +31,7 @@ public class PermissionSetGenerator
 	public static final String PS_TEMPLATE_DIR = BASE_DIR + "permissionset_templates";
 	public static final String PS_PROPERTY_DIR = BASE_DIR + "permissionsetProperty";
 	public static final String OBJECTS_DIR = BASE_DIR + "objects";
-
+	
 	public static final String COLUMN_SEPERATOR = "=";
 	public static final String PERMISSION_SEPERATOR = "#";
 	public static final String PERMISSION_SET_NAME = "permissionSetName";
@@ -41,13 +41,14 @@ public class PermissionSetGenerator
 	public static final String NODE_PAGE_ACCESSES = "pageAccesses";
 	public static final String NODE_OBJECT_PERMISSION = "objectPermissions";
 	public static final String NODE_TAB = "tab";
-	public static final String NODE_APEX_PAGE = "apexPage";
-	public static final String NODE_APEX_CLASS = "apexClass";
 	public static final String NODE_LABEL = "label";
 	public static final String NODE_FIELD_PERMISSIONS = "fieldPermissions";
 	public static final String NODE_FIELDS = "fields";
-
+	public static final String NODE_CUSTOM_PERMISSIONS = "customPermissions";
 	
+	public static final String ELM_APEX_CLASS = "apexClass";
+	public static final String ELM_APEX_PAGE = "apexPage";
+	public static final String ELM_NAME = "name";
 	public static final String ELM_ALLOW_CREATE = "allowCreate";
 	public static final String ELM_ALLOW_DELETE = "allowDelete";
 	public static final String ELM_ALLOW_EDIT = "allowEdit";
@@ -126,10 +127,20 @@ public class PermissionSetGenerator
 			{
 				Map<String,String> nodeValueMap = new TreeMap<String,String>();
 
-				nodeValueMap.put(NODE_APEX_CLASS, apexClassName);
+				nodeValueMap.put(ELM_APEX_CLASS, apexClassName);
 				nodeValueMap.put(ELM_ENABLED,ELM_VAL_TRUE);
 
 				createNode(doc,rootElement,NODE_CLASS_ACCESSES,nodeValueMap);
+			}
+			
+			for(String customPermission:ps.getCustomPermissions())
+			{
+				Map<String,String> nodeValueMap = new TreeMap<String,String>();
+
+				nodeValueMap.put(ELM_NAME, customPermission);
+				nodeValueMap.put(ELM_ENABLED,ELM_VAL_TRUE);
+
+				createNode(doc,rootElement,NODE_CUSTOM_PERMISSIONS,nodeValueMap);
 			}
 			
 			for(String object:ps.getObjects().keySet())
@@ -198,12 +209,12 @@ public class PermissionSetGenerator
 			{
 				Map<String,String> nodeValueMap = new TreeMap<String,String>();
 
-				nodeValueMap.put(NODE_APEX_PAGE, vfPage);
+				nodeValueMap.put(ELM_APEX_PAGE, vfPage);
 				nodeValueMap.put(ELM_ENABLED,ELM_VAL_TRUE);
 
 				createNode(doc,rootElement,NODE_PAGE_ACCESSES,nodeValueMap);
 			}
-
+			
 			for(String tabName:ps.getTabs().keySet())
 			{
 				String visibilityType = ps.getTabs().get(tabName).toUpperCase();
@@ -361,6 +372,10 @@ public class PermissionSetGenerator
 									{
 										psProperty.getVfPage().add(value);						
 									}
+									else if(cstic.equalsIgnoreCase(NODE_CUSTOM_PERMISSIONS))
+									{
+										psProperty.getCustomPermissions().add(value);						
+									}
 									else if(cstic.equalsIgnoreCase(NODE_TAB_SETTINGS))
 									{
 										String[] tabVisiblity = value.split(PERMISSION_SEPERATOR);
@@ -423,6 +438,7 @@ class PermissionSet
 	Map<String,String> tabs;
 	ArrayList<String> vfPage;
 	ArrayList<String> apexClasses;
+	ArrayList<String> customPermissions;
 	String permissionSetName;
 
 	PermissionSet()
@@ -431,6 +447,7 @@ class PermissionSet
 		tabs = new TreeMap<String,String>();
 		vfPage = new ArrayList<String>();
 		apexClasses = new ArrayList<String>();
+		customPermissions = new ArrayList<String>();
 	}
 
 	public Map<String,String> getObjects() 
@@ -451,6 +468,10 @@ class PermissionSet
 		return apexClasses;
 	}
 
+	public ArrayList<String> getCustomPermissions() {
+		return customPermissions;
+	}
+	
 	public String getPermissionSetName() {
 		return permissionSetName;
 	}
@@ -469,6 +490,9 @@ class PermissionSet
 	}
 	public void setPermissionSetName(String permissionSetName) {
 		this.permissionSetName = permissionSetName;
+	}
+	public void setCustomPermissions(ArrayList<String> customPermissions) {
+		this.customPermissions = customPermissions;
 	}
 }
 
